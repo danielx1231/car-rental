@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Search Results | AutoOrbit</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: white;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+    }
+
+    .navbar .logo img {
+      height: 60px;
+    }
+
+    .nav-actions a {
+      text-decoration: none;
+      font-weight: bold;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      background-color: orange;
+      color: white;
+      margin-left: 1rem;
+    }
+
+    .page-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      background: white;
+      border-radius: 10px;
+      padding-bottom: 2rem;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
+
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-bar input,
+    .filter-bar select {
+      padding: 0.7rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      min-width: 200px;
+    }
+
+    .vehicle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .vehicle-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .vehicle-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: contain;
+      background: #f6f6f6;
+    }
+
+    .vehicle-price {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #fff;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .vehicle-info {
+      padding: 1rem;
+      flex-grow: 1;
+    }
+
+    .vehicle-name {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .vehicle-type {
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    .select-btn {
+      margin: 1rem;
+      padding: 0.6rem 1.2rem;
+      background: orange;
+      color: white;
+      border: none;
+      border-radius: 999px;
+      font-weight: bold;
+      cursor: pointer;
+      align-self: flex-end;
+    }
+
+    .select-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    #no-results {
+      text-align: center;
+      color: #777;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">
+      <a href="index.html"><img src="img/logo.png" alt="AutoOrbit Logo" /></a>
+    </div>
+    <div class="nav-actions">
+      <a href="index.html">Home</a>
+      <a href="all-vehicles.html">All Vehicles</a>
+    </div>
+  </header>
+
+  <div class="page-container">
+    <h2>Search Vehicles</h2>
+
+    <!-- 搜索和筛选 -->
+    <div class="filter-bar">
+      <input type="text" id="searchBox" placeholder="Search by brand, model, description...">
+      <select id="brandFilter">
+        <option value="">All Brands</option>
+      </select>
+      <select id="typeFilter">
+        <option value="">All Types</option>
+      </select>
+    </div>
+
+    <div id="vehicle-grid" class="vehicle-grid"></div>
+    <p id="no-results" style="display:none;">No vehicles found matching your search.</p>
+  </div>
+
+  <script>
+    let cars = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch('data/cars.json')
+        .then(res => res.json())
+        .then(data => {
+          cars = data.cars;
+          populateFilters(cars);
+          applySearchAndFilters();
+        });
+
+      document.getElementById('searchBox').addEventListener('input', applySearchAndFilters);
+      document.getElementById('brandFilter').addEventListener('change', applySearchAndFilters);
+      document.getElementById('typeFilter').addEventListener('change', applySearchAndFilters);
+    });
+
+    function populateFilters(data) {
+      const brandSet = new Set();
+      const typeSet = new Set();
+      data.forEach(car => {
+        brandSet.add(car.brand);
+        typeSet.add(car.carType);
+      });
+
+      const brandFilter = document.getElementById('brandFilter');
+      [...brandSet].sort().forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b;
+        opt.textContent = b;
+        brandFilter.appendChild(opt);
+      });
+
+      const typeFilter = document.getElementById('typeFilter');
+      [...typeSet].sort().forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t;
+        typeFilter.appendChild(opt);
+      });
+    }
+
+    function applySearchAndFilters() {
+      const searchTerm = document.getElementById('searchBox').value.toLowerCase().trim();
+      const brand = document.getElementById('brandFilter').value;
+      const type = document.getElementById('typeFilter').value;
+
+      const filtered = cars.filter(car => {
+        const matchSearch = `${car.brand} ${car.carModel} ${car.description}`.toLowerCase().includes(searchTerm);
+        const matchBrand = !brand || car.brand === brand;
+        const matchType = !type || car.carType === type;
+        return matchSearch && matchBrand && matchType;
+      });
+
+      renderGrid(filtered);
+    }
+
+    function renderGrid(list) {
+      const grid = document.getElementById('vehicle-grid');
+      grid.innerHTML = '';
+
+      if (list.length === 0) {
+        document.getElementById('no-results').style.display = 'block';
+        return;
+      } else {
+        document.getElementById('no-results').style.display = 'none';
+      }
+
+      list.forEach(car => {
+        const card = document.createElement('div');
+        card.className = 'vehicle-card';
+        card.innerHTML = `
+          <img src="${car.image}" alt="${car.brand} ${car.carModel}">
+          <div class="vehicle-price">$${car.pricePerDay}/day</div>
+          <div class="vehicle-info">
+            <div class="vehicle-name">${car.brand} ${car.carModel} (${car.yearOfManufacture})</div>
+            <div class="vehicle-type">${car.fuelType} ${car.carType}</div>
+          </div>
+          <button class="select-btn" ${car.available ? '' : 'disabled'} onclick="selectCar('${car.vin}')">
+            ${car.available ? 'Select' : 'Unavailable'}
+          </button>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function selectCar(vin) {
+      localStorage.setItem('selectedVIN', vin);
+      window.location.href = 'vehicle-detail.html';
+    }
+  </script>
+</body>
+</html>

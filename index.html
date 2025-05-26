@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Car Rental | Home</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    /* 搜索框和按钮样式 */
+    .search-panel {
+      width: 90%;
+      max-width: 800px;
+      margin: 0 auto 2rem;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      align-items: center;
+    }
+    .search-panel input {
+      flex: 1;
+      padding: 0.8rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .search-panel button {
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background: orange;
+      color: white;
+      cursor: pointer;
+    }
+    /* 限制热门车型区块标题与网格的垂直间距 */
+    .popular-section {
+      margin-top: 5rem;
+      text-align: center;
+    }
+    .popular-section h2 {
+      margin: 0 0 2rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <header class="navbar sticky">
+    <div class="logo">
+      <img src="img/logo.png" alt="AutoOrbit">
+    </div>
+    <nav class="nav-links"></nav>
+    <div class="nav-actions">
+      <!-- “All Vehicles” 跳转 -->
+      <button class="book-button" onclick="location.href='all-vehicles.html'">Book Now</button>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1 class="hero-title">Wherever you need to go</h1>
+
+    <!-- 搜索框 + 按钮 -->
+    <div class="search-panel">
+      <input id="search-input" type="text" placeholder="Search by type, brand or keyword…" />
+      <button id="search-btn">Search</button>
+    </div>
+
+    <!-- Highlight Info Box -->
+    <div class="highlight-box">
+      <h2>Welcome to AutoOrbit Car Rental</h2>
+      <p>
+        AutoOrbit offers a modern and seamless car rental experience designed for flexibility, comfort, and value. Whether you're planning a weekend getaway, a business trip, or need a vehicle for your daily commute, we’ve got the perfect car for you.
+      </p>
+      <p>
+        Our diverse fleet includes everything from eco-friendly hybrids to spacious SUVs and electric vehicles. All rentals come with transparent pricing, easy online booking, and reliable customer support—putting you in the driver’s seat with confidence.
+      </p>
+    </div>
+  </section>
+
+  <!-- Popular Models Section -->
+  <div class="popular-section">
+    <h2>Popular Models</h2>
+    <a href="all-vehicles.html"
+       class="car-card-button"
+       style="padding: 0.5rem 1.5rem; background-color: orange; color: white; border-radius: 5px; text-decoration: none; font-weight: bold;">
+      All Vehicles
+    </a>
+  </div>
+
+  <!-- Car Grid Container -->
+  <div id="car-grid" class="car-grid"></div>
+
+  <!-- 省略前略部分与 CSS 相同 -->
+<script>
+  let cars = [];
+
+  document.addEventListener('DOMContentLoaded', () => {
+    fetch('data/cars.json')
+      .then(res => res.json())
+      .then(data => {
+        cars = data.cars;
+        localStorage.setItem('carsData', JSON.stringify(data));
+        renderCars(cars.slice(0, 8));
+      });
+
+    document.getElementById('search-btn').addEventListener('click', () => {
+      const q = document.getElementById('search-input').value.trim();
+      if (q) location.href = 'search-results.html?q=' + encodeURIComponent(q);
+    });
+  });
+
+  function renderCars(list) {
+    const grid = document.getElementById('car-grid');
+    grid.innerHTML = '';
+    list.forEach(car => {
+      const card = document.createElement('div');
+      card.className = 'car-card';
+      card.innerHTML = `
+        <img src="${car.image}" alt="${car.brand} ${car.carModel}" class="car-image">
+        <h3>${car.brand} ${car.carModel} (${car.yearOfManufacture})</h3>
+        <p>${car.description}</p>
+        <p><strong>Fuel:</strong> ${car.fuelType}</p>
+        <p><strong>Price/Day:</strong> $${car.pricePerDay}</p>
+        <button class="rent-btn" ${car.available ? '' : 'disabled'} onclick="handleSelect('${car.vin}', ${car.available})">
+          ${car.available ? 'Rent' : 'Unavailable'}
+        </button>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function handleSelect(vin, available) {
+    if (!available) {
+      alert("Sorry, this car is no longer available.");
+      return;
+    }
+    localStorage.setItem('selectedVIN', vin);
+    window.location.href = 'vehicle-detail.html';
+  }
+</script>
+
+</body>
+</html>

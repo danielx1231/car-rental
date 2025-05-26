@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vehicle Detail | AutoOrbit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- 顶部导航栏 -->
+  <header class="navbar sticky">
+    <div class="logo">
+      <a href="index.html"><img src="img/logo.png" alt="AutoOrbit Logo"></a>
+    </div>
+    <div class="nav-actions">
+      <button onclick="history.back()" class="book-button">Back</button>
+    </div>
+  </header>
+
+  <!-- 详情容器 -->
+  <main class="detail-container">
+    <!-- 车辆信息区域由 vehicle-detail.js 动态渲染 -->
+    <div id="vehicle-detail-container"></div>
+  </main>
+
+  <script src="js/vehicle-detail.js"></script>
+</body>
+</html>

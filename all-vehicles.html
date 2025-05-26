@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>All Vehicles | AutoOrbit</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background: #f9f9f9; }
+    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: white; box-shadow: 0 1px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 999; }
+    .navbar-center { margin: 0 auto; }
+    .navbar .logo img { height: 60px; display: block; }
+    .nav-actions a { text-decoration: none; font-weight: bold; padding: 0.5rem 1rem; border-radius: 4px; background-color: orange; color: white; }
+
+    .page-container { background: #fff; padding: 1rem; border-radius: 8px; max-width: 1200px; margin: 2rem auto; }
+    .filter-panel { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin-bottom: 1rem; }
+    .filter-panel select, .filter-panel input[type="text"] {
+      padding: 0.8rem 1rem; font-size: 1rem;
+      border: 1px solid #ccc; border-radius: 8px;
+      min-width: 200px;
+    }
+
+    .vehicle-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+    .vehicle-card { position: relative; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); overflow: hidden; display: flex; flex-direction: column; }
+    .vehicle-card img { width: 100%; height: 180px; object-fit: contain; background: #fff; }
+    .vehicle-price { position: absolute; top: 12px; right: 12px; background: #fff; padding: 0.4rem 0.8rem; border-radius: 6px; font-weight: bold; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    .vehicle-info { padding: 1rem; flex-grow: 1; }
+    .vehicle-name { font-weight: bold; margin-bottom: 0.5rem; }
+    .vehicle-type { font-size: 0.9rem; color: #555; }
+    .select-btn { margin: 1rem; padding: 0.6rem 1.2rem; background: orange; color: white; border: none; border-radius: 999px; font-weight: bold; cursor: pointer; align-self: flex-end; }
+    .select-btn:disabled { background: #888; cursor: not-allowed; opacity: 0.6; }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="navbar-center logo">
+      <img src="img/logo.png" alt="AutoOrbit Logo">
+    </div>
+    <div class="nav-actions">
+      <a href="index.html">Home</a>
+    </div>
+  </header>
+
+  <div class="page-container">
+    <div class="filter-panel">
+      <select id="brand-filter"><option value="">All Brands</option></select>
+      <select id="type-filter"><option value="">All Types</option></select>
+      <input type="text" id="search-input" placeholder="Search vehicles..." />
+    </div>
+
+    <h2>All Vehicles</h2>
+    <div id="vehicle-grid" class="vehicle-grid"></div>
+    <p id="no-results" style="display:none; text-align:center; color: #777;">No vehicles found.</p>
+  </div>
+
+  <script>
+    let cars = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const raw = localStorage.getItem('carsData');
+      if (raw) {
+        cars = JSON.parse(raw).cars;
+        initFilters(cars);
+        applyFilters();
+      } else {
+        fetch('data/cars.json')
+          .then(res => res.json())
+          .then(data => {
+            cars = data.cars;
+            localStorage.setItem('carsData', JSON.stringify(data));
+            initFilters(cars);
+            applyFilters();
+          });
+      }
+
+      document.getElementById('brand-filter').addEventListener('change', applyFilters);
+      document.getElementById('type-filter').addEventListener('change', applyFilters);
+      document.getElementById('search-input').addEventListener('input', applyFilters);
+    });
+
+    function initFilters(list) {
+      const brands = [...new Set(list.map(c => c.brand))].sort();
+      const types  = [...new Set(list.map(c => c.carType))].sort();
+      const bsel = document.getElementById('brand-filter');
+      const tsel = document.getElementById('type-filter');
+      brands.forEach(b => bsel.add(new Option(b, b)));
+      types.forEach(t => tsel.add(new Option(t, t)));
+    }
+
+    function applyFilters() {
+      const brand = document.getElementById('brand-filter').value;
+      const type = document.getElementById('type-filter').value;
+      const search = document.getElementById('search-input').value.trim().toLowerCase();
+
+      const filtered = cars.filter(c =>
+        (!brand || c.brand === brand) &&
+        (!type || c.carType === type) &&
+        (`${c.brand} ${c.carModel} ${c.description}`.toLowerCase().includes(search))
+      );
+
+      renderGrid(filtered);
+    }
+
+    function renderGrid(list) {
+      const grid = document.getElementById('vehicle-grid');
+      const noRes = document.getElementById('no-results');
+      grid.innerHTML = '';
+      noRes.style.display = list.length ? 'none' : 'block';
+
+      list.forEach(car => {
+        const card = document.createElement('div');
+        card.className = 'vehicle-card';
+        card.innerHTML = `
+          <img src="${car.image}" alt="${car.brand} ${car.carModel}">
+          <div class="vehicle-price">$${car.pricePerDay}/day</div>
+          <div class="vehicle-info">
+            <div class="vehicle-name">${car.brand} ${car.carModel} (${car.yearOfManufacture})</div>
+            <div class="vehicle-type">${car.fuelType} ${car.carType}</div>
+          </div>
+          <button class="select-btn" ${car.available ? '' : 'disabled'} onclick="selectCar('${car.vin}', ${car.available})">
+            ${car.available ? 'Select' : 'Unavailable'}
+          </button>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function selectCar(vin, isAvailable) {
+      if (!isAvailable) {
+        alert("Sorry, this car is no longer available.");
+        return;
+      }
+      localStorage.setItem('selectedVIN', vin);
+      window.location.href = 'vehicle-detail.html';
+    }
+  </script>
+</body>
+</html>

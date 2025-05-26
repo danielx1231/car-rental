@@ -1,0 +1,399 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    color: #222;
+  }
+  
+  /* Navbar */
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: white;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+  }
+  
+  .navbar .logo img {
+    height: 80px;
+    width: auto;
+  }
+  
+  .nav-links a {
+    margin: 0 1rem;
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .nav-actions button {
+    margin-left: 1rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .book-button {
+    background: orange;
+    color: white;
+    border-radius: 4px;
+  }
+  
+  .help-button {
+    background: none;
+    color: black;
+  }
+  
+  /* Hero Section */
+  .hero {
+    background: linear-gradient(to top, rgba(0,0,0,0.4), rgba(0,0,0,0.1)), url('../assets/background.jpg') no-repeat center center/cover;
+    padding: 4rem 2rem;
+    color: white;
+    text-align: center;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  /* Search Box */
+  .search-box.styled {
+    width: 90%;
+    max-width: 1100px;
+    margin: 2rem auto;
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  
+  .location-time-wrapper {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .input-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .input-group label {
+    font-size: 0.9rem;
+    color: #444;
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+  }
+  
+  .input-wrapper {
+    position: relative;
+  }
+  
+  .search-box input[type="text"],
+  .search-box input[type="date"],
+  .search-box select {
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    width: 100%;
+    box-sizing: border-box;
+    background: white;
+    color: #222;
+  }
+  
+  /* Dropdown Style */
+  .select-like {
+    position: relative;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 0.8rem;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #222;
+  }
+  
+  .select-like .arrow {
+    font-size: 0.9rem;
+    color: #666;
+  }
+  
+  .select-like .dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    border: 1px solid #ccc;
+    background: #fff;
+    border-radius: 0 0 10px 10px;
+    z-index: 20;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  
+  .dropdown li {
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+    color: #222;
+    cursor: pointer;
+  }
+  
+  .dropdown li:hover {
+    background: #f0f0f0;
+  }
+  
+  /* Button Wrapper */
+  .search-button-wrapper {
+    margin-top: 1.5rem;
+    text-align: left;
+  }
+  
+  .search-btn {
+    padding: 0.9rem 2rem;
+    background: #e46e2f;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 999px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  /* Highlight box */
+  .highlight-box {
+    background: #d4f5dd;
+    padding: 2rem;
+    margin: 4rem auto 6rem;
+    width: 60%;
+    border-radius: 10px;
+    color: #333;
+    text-align: left;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  
+  .highlight-box h2 {
+    color: #2e7d32;
+  }
+  
+  .highlight-box a {
+    color: #007BFF;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  /* Section Title */
+  .section-title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-top: 6rem;
+    margin-bottom: 4rem;
+    color: #333;
+  }
+  
+  /* 网格容器样式 */
+.car-grid {
+    display: grid;                         /* 使用 CSS Grid 布局排列车辆卡片 */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    /* ↑ 自动适应列数，每个卡片最小宽度250px，最大占据可用空间 */
+    gap: 1.5rem;                           /* 网格项之间的行间距和列间距 */
+    padding: 1rem;                         /* 可选：网格四周留一点内边距 */
+    /* 移除了 .car-grid 上的固定高度，以便根据内容自动撑开 */
+  }
+  
+  /* 单个汽车卡片样式 */
+  .car-card {
+    background: #fff;                      /* 卡片背景白色（便于与背景区分） */
+    border: 1px solid #ccc;                /* 淡灰色边框突出卡片边界 */
+    border-radius: 5px;                    /* 圆角边框 */
+    overflow: hidden;                      /* 隐藏卡片内可能溢出的内容 */
+    display: flex;
+    flex-direction: column;                /* 内部采用弹性布局，垂直排列内容 */
+    /* 不再设置固定高度或 max-height，卡片高度随内部内容自适应 */
+  }
+  
+  /* 汽车图片样式 */
+  .car-card img {
+    width: 100%;                           /* 图片宽度占满卡片 */
+    height: auto;                          /* 保持宽高比（避免拉伸变形） */
+    /* 如有需要，可增加 max-height 限制超高的图片，例如 max-height: 300px */
+    display: block;
+  }
+  
+  /* 卡片中文本内容的排版 */
+  .car-card h3 {
+    font-size: 1.2em;
+    margin: 0.5em 1em 0.2em;               /* 标题边距：上0.5em，下0.2em，左右1em */
+  }
+  .car-card p {
+    margin: 0.2em 1em;                     /* 段落边距：上下0.2em，左右1em */
+    font-size: 0.95em;
+    line-height: 1.4;
+  }
+  .car-card p.description {
+    font-style: italic;
+    color: #555;
+  }
+  
+  /* 租赁按钮样式 */
+  .rent-btn {
+    margin: 0 1em 1em;                     /* 按钮边距：下方1em，左右1em（上方留给自动间距） */
+    padding: 0.6em 1em;
+    font-size: 1em;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    background-color: #f3aa3d;             /* 绿色背景表示可租赁状态 */
+  }
+  .car-card .rent-btn:last-child {
+    margin-top: auto;                      /* 将按钮推至卡片底部（利用弹性布局填充空白） */
+  }
+  
+  /* 按钮不可用状态 */
+  .rent-btn:disabled {
+    background-color: #888;                /* 灰色背景表示车辆不可租 */
+    cursor: not-allowed;                   /* 禁用状态下鼠标样式 */
+    opacity: 0.6;
+  }
+  
+  
+  /* Sticky Navbar */
+  .navbar.sticky {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 999;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+
+  /* 统一容器样式 */
+.vehicle-card, .confirmation-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  padding: 2rem;
+  margin: 2rem auto;
+  max-width: 800px;
+}
+
+/* 图片展示 */
+.vehicle-image img {
+  width: 100%;
+  border-radius: 8px;
+  height: 400px;
+  object-fit: cover;
+}
+
+/* 时间线布局 */
+.timeline {
+  display: grid;
+  gap: 2rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  margin: 2rem 0;
+}
+
+.timeline-event h3 {
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.detail-label {
+  color: #7f8c8d;
+  display: inline-block;
+  width: 80px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .vehicle-card {
+    flex-direction: column;
+  }
+  
+  .vehicle-image img {
+    height: 250px;
+  }
+}
+
+.detail-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0;
+}
+
+.vehicle-card.confirmation-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  padding: 2rem;
+}
+
+.vehicle-image img {
+  width: 100%;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.vehicle-info {
+  position: relative;
+}
+
+.price-tag {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: #fff;
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.specs-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.spec-item {
+  background: #f9f9f9;
+  padding: 1rem;
+  text-align: center;
+  border-radius: 8px;
+}
+
+.timeline-section {
+  margin-top: 2rem;
+}
+
+.detail-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.book-button {
+  display: block;
+  margin: 2rem auto 0;
+  padding: 1rem 2rem;
+  background: orange;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-size: 1rem;
+  cursor: pointer;
+}

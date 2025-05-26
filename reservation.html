@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vehicle Reservation | AutoOrbit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .reservation-container {
+      max-width: 900px;
+      margin: 2rem auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .car-summary {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    .car-summary img {
+      width: 320px;
+      border-radius: 8px;
+      object-fit: contain;
+      background: #f6f6f6;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .car-summary .info h3 {
+      margin: 0 0 1rem;
+    }
+    .car-summary .info p {
+      margin: 0.4rem 0;
+      font-weight: 500;
+    }
+    .dates-info {
+      margin: 1.5rem 0;
+    }
+    .dates-info p {
+      margin: 0.5rem 0;
+      font-size: 1rem;
+    }
+    .reservation-form input {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    .form-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+    }
+    .confirm-button {
+      background: #f3aa3d;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 25px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .cancel-button {
+      background: #888;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 25px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .confirm-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar sticky">
+    <div class="logo">
+      <a href="index.html"><img src="img/logo.png" alt="AutoOrbit Logo"></a>
+    </div>
+    <div class="nav-actions">
+      <button onclick="history.back()" class="cancel-button">Cancel Reservation</button>
+    </div>
+  </header>
+
+  <div class="reservation-container">
+    <h2>Vehicle Reservation</h2>
+
+    <div id="carInfo" class="car-summary"></div>
+
+    <div class="dates-info">
+      <p id="startDisplay">Start: –</p>
+      <p id="endDisplay">End: –</p>
+      <p id="priceDayDisplay">Price/day: –</p>
+      <p id="totalDisplay">Total: –</p>
+    </div>
+
+    <form id="reservationForm" novalidate>
+      <input type="text" id="fullName" placeholder="Full Name" required>
+      <input type="tel" id="phone" placeholder="Phone Number" required>
+      <input type="email" id="email" placeholder="Email Address" required>
+      <input type="text" id="license" placeholder="Driver’s License #" required>
+
+      <div class="form-actions">
+        <button type="submit" id="confirmBtn" class="confirm-button" disabled>Confirm Reservation</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+   
+window.addEventListener('DOMContentLoaded', () => {
+  const booking = JSON.parse(sessionStorage.getItem('bookingDetails') || '{}');
+  if (!booking.vin) return location.href = 'index.html';
+
+  const carsData = JSON.parse(localStorage.getItem('carsData') || '{}');
+  const carIndex = (carsData.cars || []).findIndex(c => c.vin === booking.vin);
+  if (carIndex === -1) return location.href = 'index.html';
+
+  const car = carsData.cars[carIndex];
+
+  // 格式化时间 & 计算天数
+  const pickupDate = new Date(`${booking.pickupDate}T${booking.pickupTime}`);
+  const dropoffDate = new Date(`${booking.dropoffDate}T${booking.dropoffTime}`);
+  const msPerDay = 86400000;
+  const rawDays = (dropoffDate - pickupDate) / msPerDay;
+  const days = Math.ceil(rawDays > 0 ? rawDays : 1);
+  const total = days * car.pricePerDay;
+
+  // 填充页面内容
+  document.getElementById('carInfo').innerHTML = `
+    <img src="${car.image}" alt="${car.brand} ${car.carModel}">
+    <div class="info">
+      <h3>${car.brand} ${car.carModel} (${car.yearOfManufacture})</h3>
+      <p>Fuel: ${car.fuelType}</p>
+      <p>Type: ${car.carType}</p>
+    </div>`;
+  document.getElementById('startDisplay').textContent = 'Start: ' + pickupDate.toLocaleString();
+  document.getElementById('endDisplay').textContent = 'End: ' + dropoffDate.toLocaleString();
+  document.getElementById('priceDayDisplay').textContent = 'Price/day: $' + car.pricePerDay;
+  document.getElementById('totalDisplay').textContent = `Total (${days} days): $${total}`;
+
+  // 表单缓存逻辑
+  const fields = ['fullName', 'phone', 'email', 'license'];
+  fields.forEach(id => {
+    const el = document.getElementById(id);
+    const v = sessionStorage.getItem(id);
+    if (v) el.value = v;
+    el.addEventListener('input', e => {
+      sessionStorage.setItem(id, e.target.value);
+      validateForm();
+    });
+  });
+
+  document.getElementById('reservationForm').addEventListener('submit', e => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    // 二次检查车辆可用性
+    const currentCars = JSON.parse(localStorage.getItem('carsData') || '{}');
+    const matchCar = (currentCars.cars || []).find(c => c.vin === car.vin);
+    if (!matchCar || !matchCar.available) {
+      alert('This vehicle is no longer available.');
+      return location.href = 'index.html';
+    }
+
+    // 添加订单
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    orders.push({
+      vin: car.vin,
+      start: booking.pickupDate + 'T' + booking.pickupTime,
+      end: booking.dropoffDate + 'T' + booking.dropoffTime,
+      days,
+      pricePerDay: car.pricePerDay,
+      total,
+      fullName: getVal('fullName'),
+      phone: getVal('phone'),
+      email: getVal('email'),
+      license: getVal('license'),
+      status: 'confirmed'
+    });
+    localStorage.setItem('orders', JSON.stringify(orders));
+
+    // 更新车辆状态为不可用
+    const updatedCars = currentCars.cars.map(c =>
+      c.vin === car.vin ? { ...c, available: false } : c
+    );
+    localStorage.setItem('carsData', JSON.stringify({ cars: updatedCars }));
+
+    // 清除表单缓存并跳转
+    fields.forEach(id => sessionStorage.removeItem(id));
+    alert('Reservation confirmed!');
+    location.href = 'index.html';
+  });
+
+  function getVal(id) {
+    return document.getElementById(id).value.trim();
+  }
+  function validateForm() {
+    const valid = fields.every(id => getVal(id));
+    document.getElementById('confirmBtn').disabled = !valid;
+    return valid;
+  }
+  validateForm();
+});
+
+  </script>
+</body>
+</html>
